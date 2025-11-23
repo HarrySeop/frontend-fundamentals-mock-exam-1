@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Border, colors, ListRow, NavigationBar, SelectBottomSheet, Spacing, Tab, TextField } from 'tosslib';
 
 import { useSavingsProducts } from 'hooks/useSavingsProducts';
@@ -9,6 +10,17 @@ export function SavingsCalculatorPage() {
 
   const { targetAmount, monthlyAmount, savingPeriod, setTargetAmount, setMonthlyAmount, setSavingPeriod } =
     useCalculatorStore();
+
+  const filteredProducts = useMemo(() => {
+    return savingsProducts.filter(product => {
+      const isValidMonthlyAmount =
+        monthlyAmount === 0 || (product.minMonthlyAmount <= monthlyAmount && monthlyAmount <= product.maxMonthlyAmount);
+
+      const isValidTerm = savingPeriod === 0 || product.availableTerms === savingPeriod;
+
+      return isValidMonthlyAmount && isValidTerm;
+    });
+  }, [savingsProducts, monthlyAmount, savingPeriod]);
 
   const handleTargetAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const numValue = extractNumber(event.target.value);
@@ -70,23 +82,27 @@ export function SavingsCalculatorPage() {
         </Tab.Item>
       </Tab>
 
-      {savingsProducts.map(product => (
-        <ListRow
-          key={product.id}
-          contents={
-            <ListRow.Texts
-              type="3RowTypeA"
-              top={product.name}
-              topProps={{ fontSize: 16, fontWeight: 'bold', color: colors.grey900 }}
-              middle={`연 이자율: ${formatAnnualRate(product.annualRate)}`}
-              middleProps={{ fontSize: 14, color: colors.blue600, fontWeight: 'medium' }}
-              bottom={`${formatMonthlyAmountRange(product.minMonthlyAmount, product.maxMonthlyAmount)} | ${product.availableTerms}개월`}
-              bottomProps={{ fontSize: 13, color: colors.grey600 }}
-            />
-          }
-          onClick={() => {}}
-        />
-      ))}
+      {filteredProducts.length > 0 ? (
+        filteredProducts.map(product => (
+          <ListRow
+            key={product.id}
+            contents={
+              <ListRow.Texts
+                type="3RowTypeA"
+                top={product.name}
+                topProps={{ fontSize: 16, fontWeight: 'bold', color: colors.grey900 }}
+                middle={`연 이자율: ${formatAnnualRate(product.annualRate)}`}
+                middleProps={{ fontSize: 14, color: colors.blue600, fontWeight: 'medium' }}
+                bottom={`${formatMonthlyAmountRange(product.minMonthlyAmount, product.maxMonthlyAmount)} | ${product.availableTerms}개월`}
+                bottomProps={{ fontSize: 13, color: colors.grey600 }}
+              />
+            }
+            onClick={() => {}}
+          />
+        ))
+      ) : (
+        <ListRow contents={<ListRow.Texts type="1RowTypeA" top="조건에 맞는 상품이 없습니다." />} />
+      )}
 
       {/* 아래는 계산 결과 탭 내용이에요. 계산 결과 탭을 구현할 때 주석을 해제해주세요. */}
       {/* <Spacing size={8} />
