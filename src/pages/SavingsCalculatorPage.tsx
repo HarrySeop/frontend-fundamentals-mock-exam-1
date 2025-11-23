@@ -3,6 +3,7 @@ import { Assets, Border, colors, ListRow, NavigationBar, SelectBottomSheet, Spac
 
 import { useSavingsProducts } from 'hooks/useSavingsProducts';
 import { extractNumber, formatNumber, formatAnnualRate, formatMonthlyAmountRange } from 'utils/formatting';
+import { calculateSavingsResult, canCalculate } from 'utils/calculation';
 import { useCalculatorStore } from 'stores';
 import type { SavingsProduct } from 'api/savingsApi';
 
@@ -57,6 +58,13 @@ export function SavingsCalculatorPage() {
   const handleTabChange = (value: string) => {
     setActiveTab(value as 'products' | 'results');
   };
+
+  const calculationResult = useMemo(() => {
+    if (!canCalculate(targetAmount, monthlyAmount, savingPeriod, selectedProduct)) {
+      return null;
+    }
+    return calculateSavingsResult(targetAmount, monthlyAmount, savingPeriod, selectedProduct!);
+  }, [targetAmount, monthlyAmount, savingPeriod, selectedProduct]);
 
   return (
     <>
@@ -140,39 +148,48 @@ export function SavingsCalculatorPage() {
             <>
               <Spacing size={8} />
 
-              <ListRow
-                contents={
-                  <ListRow.Texts
-                    type="2RowTypeA"
-                    top="예상 수익 금액"
-                    topProps={{ color: colors.grey600 }}
-                    bottom={`1,000,000원`}
-                    bottomProps={{ fontWeight: 'bold', color: colors.blue600 }}
+              {calculationResult ? (
+                <>
+                  <ListRow
+                    contents={
+                      <ListRow.Texts
+                        type="2RowTypeA"
+                        top="예상 수익 금액"
+                        topProps={{ color: colors.grey600 }}
+                        bottom={`${formatNumber(calculationResult.expectedReturn)}원`}
+                        bottomProps={{ fontWeight: 'bold', color: colors.blue600 }}
+                      />
+                    }
                   />
-                }
-              />
-              <ListRow
-                contents={
-                  <ListRow.Texts
-                    type="2RowTypeA"
-                    top="목표 금액과의 차이"
-                    topProps={{ color: colors.grey600 }}
-                    bottom={`-500,000원`}
-                    bottomProps={{ fontWeight: 'bold', color: colors.blue600 }}
+                  <ListRow
+                    contents={
+                      <ListRow.Texts
+                        type="2RowTypeA"
+                        top="목표 금액과의 차이"
+                        topProps={{ color: colors.grey600 }}
+                        bottom={`${calculationResult.goalDifference >= 0 ? '+' : ''}${formatNumber(calculationResult.goalDifference)}원`}
+                        bottomProps={{
+                          fontWeight: 'bold',
+                          color: calculationResult.goalDifference >= 0 ? colors.blue600 : colors.red500,
+                        }}
+                      />
+                    }
                   />
-                }
-              />
-              <ListRow
-                contents={
-                  <ListRow.Texts
-                    type="2RowTypeA"
-                    top="추천 월 납입 금액"
-                    topProps={{ color: colors.grey600 }}
-                    bottom={`100,000원`}
-                    bottomProps={{ fontWeight: 'bold', color: colors.blue600 }}
+                  <ListRow
+                    contents={
+                      <ListRow.Texts
+                        type="2RowTypeA"
+                        top="추천 월 납입 금액"
+                        topProps={{ color: colors.grey600 }}
+                        bottom={`${formatNumber(calculationResult.recommendedMonthlyAmount)}원`}
+                        bottomProps={{ fontWeight: 'bold', color: colors.blue600 }}
+                      />
+                    }
                   />
-                }
-              />
+                </>
+              ) : (
+                <ListRow contents={<ListRow.Texts type="1RowTypeA" top="입력 정보가 부족합니다." />} />
+              )}
 
               <Spacing size={8} />
               <Border height={16} />
