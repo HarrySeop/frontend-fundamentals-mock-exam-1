@@ -1,21 +1,57 @@
 import { Border, colors, ListRow, NavigationBar, SelectBottomSheet, Spacing, Tab, TextField } from 'tosslib';
 
 import { useSavingsProducts } from 'hooks/useSavingsProducts';
-import { formatAnnualRate, formatMonthlyAmountRange } from 'utils/formatting';
+import { extractNumber, formatNumber, formatAnnualRate, formatMonthlyAmountRange } from 'utils/formatting';
+import { useCalculatorStore } from 'stores';
 
 export function SavingsCalculatorPage() {
   const savingsProducts = useSavingsProducts();
+
+  const { targetAmount, monthlyAmount, savingPeriod, setTargetAmount, setMonthlyAmount, setSavingPeriod } =
+    useCalculatorStore();
+
+  const handleTargetAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const numValue = extractNumber(event.target.value);
+    setTargetAmount(numValue);
+  };
+
+  const handleMonthlyAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const numValue = extractNumber(event.target.value);
+    setMonthlyAmount(numValue);
+  };
+
+  const handleSavingPeriodChange = (period: number) => {
+    setSavingPeriod(period);
+  };
+
   return (
     <>
       <NavigationBar title="적금 계산기" />
 
       <Spacing size={16} />
 
-      <TextField label="목표 금액" placeholder="목표 금액을 입력하세요" suffix="원" />
+      <TextField
+        label="목표 금액"
+        placeholder="목표 금액을 입력하세요"
+        suffix="원"
+        value={targetAmount > 0 ? formatNumber(targetAmount) : ''}
+        onChange={handleTargetAmountChange}
+      />
       <Spacing size={16} />
-      <TextField label="월 납입액" placeholder="희망 월 납입액을 입력하세요" suffix="원" />
+      <TextField
+        label="월 납입액"
+        placeholder="희망 월 납입액을 입력하세요"
+        suffix="원"
+        value={monthlyAmount > 0 ? formatNumber(monthlyAmount) : ''}
+        onChange={handleMonthlyAmountChange}
+      />
       <Spacing size={16} />
-      <SelectBottomSheet label="저축 기간" title="저축 기간을 선택해주세요" value={12} onChange={() => {}}>
+      <SelectBottomSheet
+        label="저축 기간"
+        title="저축 기간을 선택해주세요"
+        value={savingPeriod}
+        onChange={handleSavingPeriodChange}
+      >
         <SelectBottomSheet.Option value={6}>6개월</SelectBottomSheet.Option>
         <SelectBottomSheet.Option value={12}>12개월</SelectBottomSheet.Option>
         <SelectBottomSheet.Option value={24}>24개월</SelectBottomSheet.Option>

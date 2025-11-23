@@ -1,11 +1,22 @@
 /**
+ * 문자열에서 숫자만 추출하여 안전한 숫자로 변환
+ *
+ * @param value 숫자가 포함된 문자열 (예: "1,000,000", "123abc", "")
+ * @returns 추출된 숫자 (예: 1000000, 123, 0)
+ */
+export function extractNumber(value: string): number {
+  const numbers = value.replace(/[^\d]/g, ''); // 숫자만 추출
+  return Number(numbers) || 0;
+}
+
+/**
  * 숫자를 천단위 콤마가 포함된 문자열로 포맷팅
  *
- * @param amount 포맷팅할 숫자
+ * @param number 포맷팅할 숫자
  * @returns 천단위 콤마가 포함된 문자열 (예: "1,000,000")
  */
-export function formatAmount(amount: number): string {
-  return amount.toLocaleString('ko-KR');
+export function formatNumber(number: number): string {
+  return number.toLocaleString('ko-KR');
 }
 
 /**
@@ -26,5 +37,5 @@ export function formatAnnualRate(rate: number): string {
  * @returns 범위 문자열 (예: "10,000원 ~ 500,000원")
  */
 export function formatMonthlyAmountRange(minAmount: number, maxAmount: number): string {
-  return `${formatAmount(minAmount)}원 ~ ${formatAmount(maxAmount)}원`;
+  return `${formatNumber(minAmount)}원 ~ ${formatNumber(maxAmount)}원`;
 }
