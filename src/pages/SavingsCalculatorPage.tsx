@@ -1,21 +1,7 @@
 import { Border, colors, ListRow, NavigationBar, SelectBottomSheet, Spacing, Tab, TextField } from 'tosslib';
 
 import { useSavingsProducts } from 'hooks/useSavingsProducts';
-
-// 천단위 콤마 포맷팅 함수
-function formatAmount(amount: number): string {
-  return amount.toLocaleString('ko-KR');
-}
-
-// 연이자율 포맷팅 함수
-function formatAnnualRate(rate: number): string {
-  return `${rate}%`;
-}
-
-// 월납입액 범위 포맷팅 함수
-function formatMonthlyAmountRange(minAmount: number, maxAmount: number): string {
-  return `${formatAmount(minAmount)}원 ~ ${formatAmount(maxAmount)}원`;
-}
+import { formatAnnualRate, formatMonthlyAmountRange } from 'utils/formatting';
 
 export function SavingsCalculatorPage() {
   const savingsProducts = useSavingsProducts();
